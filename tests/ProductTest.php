@@ -70,6 +70,24 @@ class ProductTest extends TestCase
 
 
     /**
+     * Testing listAction()
+     */
+    public function testListAction()
+    {
+        $response = $this->sendRequest('GET', '/products');
+
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertJsonContentType( $response );
+
+        $products = $this->getResponseContent($response);
+        $this->assertInternalType('array', $products);
+        $this->assertArrayHasKey('products', $products);
+        $this->assertCount(5, $products['products']);
+        $this->assertAllProductPropertiesExist($products['products'][0]);
+    }
+
+
+    /**
      * @return array
      */
     private function getNewProductData()

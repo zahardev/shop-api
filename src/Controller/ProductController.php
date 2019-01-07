@@ -73,6 +73,23 @@ class ProductController extends BaseController
 
 
     /**
+     * @Route("/products", methods={"GET"})
+     * */
+    public function listAction()
+    {
+        $products = $this->productRepository->findAll();
+
+        $res = [];
+
+        foreach ($products as $product) {
+            $res[] = $this->serialize($product);
+        }
+
+        return new JsonResponse(['products' => $res]);
+    }
+
+
+    /**
      * @param Product $product
      * @return array
      */
