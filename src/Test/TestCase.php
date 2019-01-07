@@ -84,6 +84,16 @@ class TestCase extends WebTestCase
 
     /**
      * @param Response $response
+     * @return array|null
+     */
+    protected function getResponseContent( Response $response )
+    {
+        return json_decode($response->getContent(), true);
+    }
+
+
+    /**
+     * @param Response $response
      */
     protected function assertJsonContentType(Response $response)
     {
@@ -93,12 +103,44 @@ class TestCase extends WebTestCase
     }
 
 
-	/**
-	 * @param Response $response
-	 * @return array|null
-	 */
-	protected function getResponseContent( Response $response )
-	{
-		return json_decode($response->getContent(), true);
-	}
+    /**
+     *
+     * @param array $productData
+     */
+    protected function assertAllProductPropertiesExist(array $productData)
+    {
+        foreach (['name', 'barcode', 'cost', 'vat'] as $key) {
+            $this->assertArrayHasKey($key, $productData);
+        }
+    }
+
+
+    /**
+     * @return array
+     */
+    protected function getNewProductData()
+    {
+        return [
+            'name' => 'Test Product',
+            'barcode' => 9999999999999,
+            'cost' => 19.75,
+            'vat' => 6,
+        ];
+    }
+
+
+    /**
+     * This product exists in the test database
+     *
+     * @see fixtures/dummy.yaml
+     */
+    protected function getDummyProductData()
+    {
+        return [
+            'name' => 'Single Test',
+            'barcode' => 1234567890123,
+            'cost' => 278.75,
+            'vat' => 21,
+        ];
+    }
 }
