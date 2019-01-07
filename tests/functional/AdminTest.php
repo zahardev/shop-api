@@ -13,23 +13,11 @@ use Symfony\Component\HttpFoundation\Response;
 class AdminTest extends TestCase
 {
 
-    /**
-     * Testing newAction()
-     */
-    public function testNewAction()
+    public function testNewProduct()
     {
         $data = $this->getNewProductData();
 
         $response = $this->sendRequest('POST', '/products', json_encode($data));
-
-        //Debug errors
-        if (!$response->isSuccessful()) {
-            $block = self::$client->getCrawler()->filter('h1.exception-message');
-            if ($block->count()) {
-                $error = $block->text();
-                echo $error;
-            }
-        }
 
         //Check response status and headers
         $this->assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
@@ -46,10 +34,7 @@ class AdminTest extends TestCase
     }
 
 
-    /**
-     * Testing listAction()
-     */
-    public function testListAction()
+    public function testListProducts()
     {
         $response = $this->sendRequest('GET', '/products');
 

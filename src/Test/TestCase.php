@@ -78,7 +78,18 @@ class TestCase extends WebTestCase
     protected function sendRequest( string $method, string $uri, string $content = null ){
         self::$client->request($method, $uri, array(), array(), array(), $content );
 
-        return self::$client->getResponse();
+        $response = self::$client->getResponse();
+
+        //Debug errors
+        if (!$response->isSuccessful()) {
+            $block = self::$client->getCrawler()->filter('h1.exception-message');
+            if ($block->count()) {
+                $error = $block->text();
+                echo $error;
+            }
+        }
+
+        return $response;
     }
 
 
@@ -109,8 +120,19 @@ class TestCase extends WebTestCase
      */
     protected function assertAllProductPropertiesExist(array $productData)
     {
-        foreach (['name', 'barcode', 'cost', 'vat'] as $key) {
-            $this->assertArrayHasKey($key, $productData);
+        $this->assertAllPropertiesExist($productData, ['name', 'barcode', 'cost', 'vat']);
+    }
+
+
+    /**
+     *
+     * @param array $data
+     * @param array $properties
+     */
+    protected function assertAllPropertiesExist(array $data, array $properties)
+    {
+        foreach ($properties as $key) {
+            $this->assertArrayHasKey($key, $data);
         }
     }
 
