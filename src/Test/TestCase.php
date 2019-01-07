@@ -120,7 +120,7 @@ class TestCase extends WebTestCase
      */
     protected function assertAllProductPropertiesExist(array $productData)
     {
-        $this->assertAllPropertiesExist($productData, ['name', 'barcode', 'cost', 'vat']);
+        $this->assertAllPropertiesExist($productData, ['name', 'barcode', 'cost', 'vatClass']);
     }
 
 
@@ -146,7 +146,7 @@ class TestCase extends WebTestCase
             'name' => 'Test Product',
             'barcode' => 9999999999999,
             'cost' => 19.75,
-            'vat' => 6,
+            'vatClass' => 6,
         ];
     }
 
@@ -175,19 +175,19 @@ class TestCase extends WebTestCase
                 'name' => 'Test Product 1',
                 'barcode' => 1111111111111,
                 'cost' => 11.11,
-                'vat' => 21,
+                'vatClass' => 21,
             ],
             [
                 'name' => 'Test Product 2',
                 'barcode' => 2222222222222,
                 'cost' => 22.22,
-                'vat' => 21,
+                'vatClass' => 21,
             ],
             [
                 'name' => 'Test Product 3',
                 'barcode' => 3333333333333,
                 'cost' => 33.33,
-                'vat' => 6,
+                'vatClass' => 6,
             ],
         ];
     }

@@ -37,13 +37,12 @@ class ProductType extends AbstractType
                 'disabled' => $options['is_edit']
             ])
             ->add('cost', MoneyType::class)
-            ->add('vat', EntityType::class, [
+            ->add('vatClass', EntityType::class, [
                 'class' => VatClass::class,
                 'choices' => $this->vatClassRepository->findAll(),
                 'choice_value' => function (VatClass $entity = null) {
                     return $entity ? $entity->getPercent() : '';
-                },
-                'property_path' => 'vatClass'
+                }
             ]);
     }
 
