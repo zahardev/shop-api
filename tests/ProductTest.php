@@ -37,6 +37,53 @@ class ProductTest extends TestCase
 
 
     /**
+     * Testing newAction()
+     */
+    public function testNewAction()
+    {
+        $data = $this->getNewProductData();
+
+        $response = $this->sendRequest('POST', '/products', json_encode($data));
+
+        //Debug errors
+        if (!$response->isSuccessful()) {
+            $block = self::$client->getCrawler()->filter('h1.exception-message');
+            if ($block->count()) {
+                $error = $block->text();
+                echo $error;
+            }
+        }
+
+        //Check response status and headers
+        $this->assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
+        $this->assertJsonContentType($response);
+        $location = $response->headers->get('Location');
+        $this->assertNotEmpty($location);
+        $this->assertEquals('/products/' . $data['barcode'], $location);
+
+
+        //Check response content
+        $productData = $this->getResponseContent($response);
+        $this->assertInternalType('array', $productData);
+        $this->assertEquals($data, $productData);
+    }
+
+
+    /**
+     * @return array
+     */
+    private function getNewProductData()
+    {
+        return [
+            'name' => 'Test Product',
+            'barcode' => 9999999999999,
+            'cost' => 19.75,
+            'vat' => 6,
+        ];
+    }
+
+
+    /**
      * This product exists in the test database
      *
      * @see fixtures/dummy.yaml
@@ -47,7 +94,7 @@ class ProductTest extends TestCase
             'name' => 'Single Test',
             'barcode' => 1234567890123,
             'cost' => 278.75,
-            'vatClass' => 21,
+            'vat' => 21,
         ];
     }
 
@@ -58,7 +105,7 @@ class ProductTest extends TestCase
      */
     private function assertAllProductPropertiesExist(array $productData)
     {
-        foreach (['name', 'barcode', 'cost', 'vatClass'] as $key) {
+        foreach (['name', 'barcode', 'cost', 'vat'] as $key) {
             $this->assertArrayHasKey($key, $productData);
         }
     }
