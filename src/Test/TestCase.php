@@ -158,11 +158,51 @@ class TestCase extends WebTestCase
      */
     protected function getDummyProductData()
     {
+        return $this->getDummyProductsData()[0];
+    }
+
+
+    /**
+     * This products exist in the test database
+     *
+     * @see fixtures/dummy.yaml
+     *
+     * */
+    protected function getDummyProductsData()
+    {
         return [
-            'name' => 'Single Test',
-            'barcode' => 1234567890123,
-            'cost' => 278.75,
-            'vat' => 21,
+            [
+                'name' => 'Test Product 1',
+                'barcode' => 1111111111111,
+                'cost' => 11.11,
+                'vat' => 21,
+            ],
+            [
+                'name' => 'Test Product 2',
+                'barcode' => 2222222222222,
+                'cost' => 22.22,
+                'vat' => 21,
+            ],
+            [
+                'name' => 'Test Product 3',
+                'barcode' => 3333333333333,
+                'cost' => 33.33,
+                'vat' => 6,
+            ],
         ];
     }
+
+    /**
+     * This product exists in the test database
+     *
+     * @see fixtures/dummy.yaml
+     */
+    protected function getDummyUnfinishedReceiptData()
+    {
+        return [
+            'uuid' => '3f2e511d-f775-4324-9c38-17b93d8a55b0',
+            'status' => 'unfinished',
+        ];
+    }
+
 }

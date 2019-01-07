@@ -44,7 +44,7 @@ class AdminTest extends TestCase
         $products = $this->getResponseContent($response);
         $this->assertInternalType('array', $products);
         $this->assertArrayHasKey('products', $products);
-        $this->assertCount(5, $products['products']);
+        $this->assertCount(3, $products['products']);
         $this->assertAllProductPropertiesExist($products['products'][0]);
     }
 }

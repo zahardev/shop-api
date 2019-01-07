@@ -34,9 +34,10 @@ class ReceiptItem
      */
     private $quantity;
 
-    public function __construct()
+    public function __construct(Product $product, int $quantity)
     {
-        $this->product = new ArrayCollection();
+        $this->product = $product;
+        $this->quantity = $quantity;
     }
 
     public function getId(): ?int
@@ -61,22 +62,24 @@ class ReceiptItem
         return $this->product;
     }
 
-    public function setProduct(?Product $product): self
-    {
-        $this->product = $product;
-
-        return $this;
-    }
 
     public function getQuantity(): ?int
     {
         return $this->quantity;
     }
 
-    public function setQuantity(int $quantity): self
+    public function addQuantity(int $quantity): self
     {
-        $this->quantity = $quantity;
+        $this->quantity += $quantity;
 
         return $this;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'barcode' => $this->getProduct()->getBarcode(),
+            'quantity' => $this->getQuantity(),
+        ];
     }
 }

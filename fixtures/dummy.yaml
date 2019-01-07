@@ -3,13 +3,24 @@ App\Entity\VatClass:
         percent: <current()>
 
 App\Entity\Product:
-    product_0:
-        name: 'Single Test'
-        barcode: 1234567890123
-        cost: 278.75
+    product_1:
+        name: 'Test Product 1'
+        barcode: 1111111111111
+        cost: 11.11
         vatClass: '@vat_class_21'
-    product_{1..4}:
-        name: <implode(' ', <words(2)>)>
-        barcode: '<ean13()>'
-        cost: '<randomFloat(2, 10, 999)>'
-        vatClass: '@vat_class_<randomElement([6, 21])>'
+    product_2:
+        name: 'Test Product 2'
+        barcode: 2222222222222
+        cost: 22.22
+        vatClass: '@vat_class_21'
+    product_3:
+        name: 'Test Product 3'
+        barcode: 3333333333333
+        cost: 33.33
+        vatClass: '@vat_class_6'
+
+
+App\Entity\Receipt:
+    receipt_unfinished:
+        status: 'unfinished'
+        uuid: '3f2e511d-f775-4324-9c38-17b93d8a55b0'

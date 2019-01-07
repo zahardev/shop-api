@@ -36,7 +36,7 @@ class Receipt
     private $status;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\ReceiptItem", mappedBy="receipt", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\ReceiptItem", mappedBy="receipt", orphanRemoval=true, cascade={"persist"})
      */
     private $receiptItems;
 
@@ -56,9 +56,21 @@ class Receipt
         return $this->id;
     }
 
-    public function getUuid() : string
+    public function getUuid(): string
     {
         return $this->uuid;
+    }
+
+    /**
+     * Should be used only for fixtures
+     * @param string $uuid
+     * @return Receipt
+     */
+    public function setUuid(string $uuid): self
+    {
+        $this->uuid = $uuid;
+
+        return $this;
     }
 
     public function getStatus(): string
@@ -106,5 +118,19 @@ class Receipt
         }
 
         return $this;
+    }
+
+    public function toArray(): array
+    {
+        $items = $this->getReceiptItems()->toArray();
+        foreach ($items as $k => $item) {
+            $items[$k] = $item->toArray();
+        }
+
+        return [
+            'status' => $this->getStatus(),
+            'uuid' => $this->getUuid(),
+            'items' => $items,
+        ];
     }
 }
