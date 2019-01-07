@@ -1,0 +1,15 @@
+App\Entity\VatClass:
+   class_{6, 21}:
+        percent: <current()>
+
+App\Entity\Product:
+    dummy_0:
+        name: 'Single Test'
+        barcode: 1234567890123
+        cost: 278.75
+        vatClass: '@class_21'
+    dummy_{1..4}:
+        name: <implode(' ', <words(2)>)>
+        barcode: '<ean13()>'
+        cost: '<randomFloat(2, 10, 999)>'
+        vatClass: '@class_<randomElement([6, 21])>'
