@@ -41,6 +41,51 @@ class Receipt
     private $receiptItems;
 
     /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $total;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $totalVat;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $totalWithVat;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $total21;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $totalVat21;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $totalWithVat21;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $total6;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $totalVat6;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $totalWithVat6;
+
+    /**
      * Receipt constructor.
      * @throws \Exception
      */
@@ -104,6 +149,8 @@ class Receipt
             $receiptItem->setReceipt($this);
         }
 
+        $this->recalculate();
+
         return $this;
     }
 
@@ -117,7 +164,160 @@ class Receipt
             }
         }
 
+        $this->recalculate();
+
         return $this;
+    }
+
+
+    public function getTotal(): ?float
+    {
+        return $this->total;
+    }
+
+    private function setTotal(?float $total): self
+    {
+        $this->total = $total;
+
+        return $this;
+    }
+
+    public function getTotalVat(): ?float
+    {
+        return $this->totalVat;
+    }
+
+    private function setTotalVat(?float $totalVat): self
+    {
+        $this->totalVat = $totalVat;
+
+        return $this;
+    }
+
+    public function getTotalWithVat(): ?float
+    {
+        return $this->totalWithVat;
+    }
+
+    private function setTotalWithVat(float $totalWithVat): self
+    {
+        $this->totalWithVat = $totalWithVat;
+
+        return $this;
+    }
+
+    public function getTotal21(): ?float
+    {
+        return $this->total21;
+    }
+
+    private function setTotal21(?float $total21): self
+    {
+        $this->total21 = $total21;
+
+        return $this;
+    }
+
+    public function getTotalVat21(): ?float
+    {
+        return $this->totalVat21;
+    }
+
+    private function setTotalVat21(?float $totalVat21): self
+    {
+        $this->totalVat21 = $totalVat21;
+
+        return $this;
+    }
+
+    public function getTotalWithVat21(): ?float
+    {
+        return $this->totalWithVat21;
+    }
+
+    private function setTotalWithVat21(?float $totalWithVat21): self
+    {
+        $this->totalWithVat21 = $totalWithVat21;
+
+        return $this;
+    }
+
+    public function getTotal6(): ?float
+    {
+        return $this->total6;
+    }
+
+    private function setTotal6(?float $total6): self
+    {
+        $this->total6 = $total6;
+
+        return $this;
+    }
+
+    public function getTotalVat6(): ?float
+    {
+        return $this->totalVat6;
+    }
+
+    private function setTotalVat6(?float $totalVat6): self
+    {
+        $this->totalVat6 = $totalVat6;
+
+        return $this;
+    }
+
+    public function getTotalWithVat6(): ?float
+    {
+        return $this->totalWithVat6;
+    }
+
+    private function setTotalWithVat6(?float $totalWithVat6): self
+    {
+        $this->totalWithVat6 = $totalWithVat6;
+
+        return $this;
+    }
+
+
+    protected function recalculate()
+    {
+        $totals = [];
+        $totalVats = [];
+        $totalWithVats = [];
+
+        $totals21 = [];
+        $totalVats21 = [];
+        $totalWithVats21 = [];
+
+        $totals6 = [];
+        $totalVats6 = [];
+        $totalWithVats6 = [];
+
+        foreach ($this->getReceiptItems()->toArray() as $receiptItem) {
+            /** @var ReceiptItem $receiptItem */
+            $vatClass = $receiptItem->getVatClass();
+
+            $totals[] = $receiptItem->getTotal();
+            ${'totals'.$vatClass}[] = $receiptItem->getTotal();
+
+            $totalVats[] = $receiptItem->getTotalVat();
+            ${'totalVats'.$vatClass}[] = $receiptItem->getTotalVat();
+
+            $totalWithVats[] = $receiptItem->getTotalWithVat();
+            ${'totalWithVats'.$vatClass}[] = $receiptItem->getTotalWithVat();
+        }
+
+        $this->setTotal(array_sum($totals));
+        $this->setTotalVat(array_sum($totalVats));
+        $this->setTotalWithVat(array_sum($totalWithVats));
+
+        $this->setTotal21(array_sum($totals21));
+        $this->setTotalVat21(array_sum($totalVats21));
+        $this->setTotalWithVat21(array_sum($totalWithVats21));
+
+        $this->setTotal6(array_sum($totals6));
+        $this->setTotalVat6(array_sum($totalVats6));
+        $this->setTotalWithVat6(array_sum($totalWithVats6));
     }
 
     public function toArray(): array
@@ -131,6 +331,15 @@ class Receipt
             'status' => $this->getStatus(),
             'uuid' => $this->getUuid(),
             'items' => $items,
+            'total' => $this->getTotal(),
+            'totalVat' => $this->getTotalVat(),
+            'totalWithVat' => $this->getTotalWithVat(),
+            'total21' => $this->getTotal21(),
+            'totalVat21' => $this->getTotalVat21(),
+            'totalWithVat21' => $this->getTotalWithVat21(),
+            'total6' => $this->getTotal6(),
+            'totalVat6' => $this->getTotalVat6(),
+            'totalWithVat6' => $this->getTotalWithVat6(),
         ];
     }
 }
