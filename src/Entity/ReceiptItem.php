@@ -21,7 +21,7 @@ class ReceiptItem
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Receipt", inversedBy="receiptItems")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=true) //for test reasons
      */
     private $receipt;
 

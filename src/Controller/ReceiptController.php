@@ -54,6 +54,24 @@ class ReceiptController extends BaseController
 
 
     /**
+     * @Route("/receipts/{uuid}", methods={"GET"})
+     * @return Response
+     */
+    public function getReceipt($uuid)
+    {
+        $receipt = $this->receiptRepository->findOneBy(['uuid' => $uuid]);
+
+        if (empty($receipt)) {
+            throw new HttpException(400, 'Could not find such receipt!');
+        }
+
+        $response = new JsonResponse($receipt->toArray(), Response::HTTP_OK);
+
+        return $response;
+    }
+
+
+    /**
      * @Route("/receipts/{uuid}", methods={"PATCH"})
      * @param string $uuid
      * @param Request $request

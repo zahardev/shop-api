@@ -205,4 +205,19 @@ class TestCase extends WebTestCase
         ];
     }
 
+
+    protected function getDummyReceiptData()
+    {
+        return [
+            'receipt_empty' => [
+                'uuid' => '3f2e511d-f775-4324-9c38-17b93d8a55b0',
+                'status' => 'unfinished',
+            ],
+            'receipt_with_items' => [
+                'uuid' => '7be3393b-3764-4f42-bf9b-f5b28a3f7c85',
+                'status' => 'unfinished',
+            ],
+        ];
+    }
+
 }

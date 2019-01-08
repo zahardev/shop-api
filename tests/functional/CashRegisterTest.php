@@ -51,13 +51,11 @@ class CashRegisterTest extends TestCase
 
     public function testAddReceiptItem()
     {
-        $receiptData = $this->getDummyUnfinishedReceiptData();
+        $receiptData = $this->getDummyReceiptData()['receipt_empty'];
         $productsData = $this->getDummyProductsData();
 
         $count = 0;
         $quantity = 3;
-        $expectedItemCalculations = $this->getExpectedItemCalculations();
-        $expectedReceiptCalculations = $this->getExpectedReceiptCalculations();
 
         foreach ($productsData as $productData) {
             $count++;
@@ -79,49 +77,75 @@ class CashRegisterTest extends TestCase
             $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
             $this->assertJsonContentType($response);
 
-            //Check response content
-            $expectedReceiptProperties = [
-                'status' => 'unfinished',
-                'uuid' => $receiptData['uuid'],
-                'total' => $expectedReceiptCalculations[$count]['total'],
-                'totalVat' => $expectedReceiptCalculations[$count]['totalVat'],
-                'totalWithVat' => $expectedReceiptCalculations[$count]['totalWithVat'],
-                'total21' => $expectedReceiptCalculations[$count]['total21'],
-                'totalVat21' => $expectedReceiptCalculations[$count]['totalVat21'],
-                'totalWithVat21' => $expectedReceiptCalculations[$count]['totalWithVat21'],
-                'total6' => $expectedReceiptCalculations[$count]['total6'],
-                'totalVat6' => $expectedReceiptCalculations[$count]['totalVat6'],
-                'totalWithVat6' => $expectedReceiptCalculations[$count]['totalWithVat6'],
-            ];
+            //Check response data
             $data = $this->getResponseContent($response);
             $this->assertInternalType('array', $data);
+            $this->checkReceiptResponseData($data, $receiptData, $count);
+            $this->checkReceiptResponseItemData($data, $productData, $count);
+        }
+    }
 
-            $this->assertNotEmpty($data['items']);
-            $this->assertCount($count, $data['items']);
+    public function testGetReceipt()
+    {
+        $receiptData = $this->getDummyReceiptData()['receipt_with_items'];
+        $response = $this->sendRequest('GET', '/receipts/'.$receiptData['uuid']);
 
-            foreach ($expectedReceiptProperties as $property => $expected) {
-                $this->assertArrayHasKey($property, $data);
-                $this->assertEquals($expected, $data[$property], sprintf('Receipt property %s problem.', $property));
-            }
+        $data = $this->getResponseContent($response);
+        $this->checkReceiptResponseData($data, $receiptData, 3); //all 3 iterations were inserted in the dummy.yaml
+    }
 
-            $expectedItemProperties = [
-                'name' => $productData['name'],
-                'barcode' => $productData['barcode'],
-                'cost' => $productData['cost'],
-                'vatClass' => $productData['vatClass'],
-                'quantity' => $quantity,
-                'costWithVat' => $expectedItemCalculations[$count]['costWithVat'],
-                'vat' => $expectedItemCalculations[$count]['vat'],
-                'total' => $expectedItemCalculations[$count]['total'],
-                'totalVat' => $expectedItemCalculations[$count]['totalVat'],
-                'totalWithVat' => $expectedItemCalculations[$count]['totalWithVat'],
-            ];
 
-            foreach ($expectedItemProperties as $property => $expected) {
-                $item = $data['items'][$count-1];
-                $this->assertArrayHasKey($property, $item);
-                $this->assertEquals($expected, $item[$property], sprintf('Item property %s problem.', $property));
-            }
+    private function checkReceiptResponseItemData(array $data, array $productData, int $iteration)
+    {
+        $quantity = 3;
+        $expectedItemCalculations = $this->getExpectedItemCalculations();
+        $receiptItem = $data['items'][$iteration-1];
+
+        $expectedItemProperties = [
+            'name' => $productData['name'],
+            'barcode' => $productData['barcode'],
+            'cost' => $productData['cost'],
+            'vatClass' => $productData['vatClass'],
+            'quantity' => $quantity,
+            'costWithVat' => $expectedItemCalculations[$iteration]['costWithVat'],
+            'vat' => $expectedItemCalculations[$iteration]['vat'],
+            'total' => $expectedItemCalculations[$iteration]['total'],
+            'totalVat' => $expectedItemCalculations[$iteration]['totalVat'],
+            'totalWithVat' => $expectedItemCalculations[$iteration]['totalWithVat'],
+        ];
+
+        foreach ($expectedItemProperties as $property => $expected) {
+            $this->assertArrayHasKey($property, $receiptItem);
+            $this->assertEquals($expected, $receiptItem[$property], sprintf('Item property %s problem.', $property));
+        }
+    }
+
+
+    private function checkReceiptResponseData( array $data, array $receiptData, int $iteration )
+    {
+        $expectedReceiptCalculations = $this->getExpectedReceiptCalculations();
+
+        //Check response content
+        $expectedReceiptProperties = [
+            'status' => 'unfinished',
+            'uuid' => $receiptData['uuid'],
+            'total' => $expectedReceiptCalculations[$iteration]['total'],
+            'totalVat' => $expectedReceiptCalculations[$iteration]['totalVat'],
+            'totalWithVat' => $expectedReceiptCalculations[$iteration]['totalWithVat'],
+            'total21' => $expectedReceiptCalculations[$iteration]['total21'],
+            'totalVat21' => $expectedReceiptCalculations[$iteration]['totalVat21'],
+            'totalWithVat21' => $expectedReceiptCalculations[$iteration]['totalWithVat21'],
+            'total6' => $expectedReceiptCalculations[$iteration]['total6'],
+            'totalVat6' => $expectedReceiptCalculations[$iteration]['totalVat6'],
+            'totalWithVat6' => $expectedReceiptCalculations[$iteration]['totalWithVat6'],
+        ];
+
+        $this->assertNotEmpty($data['items']);
+        $this->assertCount($iteration, $data['items']);
+
+        foreach ($expectedReceiptProperties as $property => $expected) {
+            $this->assertArrayHasKey($property, $data);
+            $this->assertEquals($expected, $data[$property], sprintf('Receipt property %s problem.', $property));
         }
     }
 
