@@ -99,7 +99,7 @@ class ProductController extends BaseController
             'name' => $product->getName(),
             'barcode' => $product->getBarcode(),
             'cost' => $product->getCost(),
-            'vatClass' => $product->getVatClass()->getPercent(),
+            'vatClass' => $product->getVatClass(),
         ];
     }
 

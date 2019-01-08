@@ -9,6 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Product
 {
+    const VAT_CLASSES = [6, 21];
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -33,8 +35,7 @@ class Product
     private $name;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\VatClass", inversedBy="products")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\Column(type="integer")
      */
     private $vatClass;
 
@@ -81,13 +82,17 @@ class Product
         return $this;
     }
 
-    public function getVatClass(): ?VatClass
+    public function getVatClass(): ?int
     {
         return $this->vatClass;
     }
 
-    public function setVatClass(?VatClass $vatClass): self
+    public function setVatClass(int $vatClass): self
     {
+        if (!in_array($vatClass, self::VAT_CLASSES)) {
+            throw new \InvalidArgumentException("Invalid status");
+        }
+
         $this->vatClass = $vatClass;
 
         return $this;

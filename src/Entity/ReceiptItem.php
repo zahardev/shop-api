@@ -203,7 +203,7 @@ class ReceiptItem
     {
         //copy product properties here for history (in case if product changes)
         $this->setCost($this->product->getCost());
-        $this->setVatClass($this->product->getVatClass()->getPercent());
+        $this->setVatClass($this->product->getVatClass());
 
         $this->setVat($this->cost * $this->vatClass / 100);
         $this->setCostWithVat($this->cost + $this->vat);
