@@ -59,19 +59,12 @@ class CashRegisterTest extends TestCase
 
         foreach ($productsData as $productData) {
             $count++;
+
             $request = [
-                'op' => 'add',
-                'path' => '/items',
-                'value' => [
-                    'barcode' => $productData['barcode'],
-                    'quantity' => $quantity,
-                ],
+                'barcode' => $productData['barcode'],
+                'quantity' => $quantity,
             ];
-            $response = $this->sendRequest(
-                'PATCH',
-                '/receipts/'.$receiptData['uuid'],
-                json_encode($request)
-            );
+            $response = $this->sendPatchRequest('/receipts/'.$receiptData['uuid'], 'add', '/items', $request);
 
             //Check response status and headers
             $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
@@ -94,12 +87,25 @@ class CashRegisterTest extends TestCase
         $this->checkReceiptResponseData($data, $receiptData, 3); //all 3 iterations were inserted in the dummy.yaml
     }
 
+    public function testFinishReceipt()
+    {
+        $receiptData = $this->getDummyReceiptData()['receipt_with_items'];
+        $response = $this->sendPatchRequest('/receipts/'.$receiptData['uuid'], 'replace', '/status', 'finished');
+
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertJsonContentType($response);
+
+        $data = $this->getResponseContent($response);
+        $receiptData['status'] = 'finished';
+        $this->checkReceiptResponseData($data, $receiptData, 3);
+    }
+
 
     private function checkReceiptResponseItemData(array $data, array $productData, int $iteration)
     {
         $quantity = 3;
         $expectedItemCalculations = $this->getExpectedItemCalculations();
-        $receiptItem = $data['items'][$iteration-1];
+        $receiptItem = $data['items'][$iteration - 1];
 
         $expectedItemProperties = [
             'name' => $productData['name'],
@@ -121,13 +127,13 @@ class CashRegisterTest extends TestCase
     }
 
 
-    private function checkReceiptResponseData( array $data, array $receiptData, int $iteration )
+    private function checkReceiptResponseData(array $data, array $receiptData, int $iteration)
     {
         $expectedReceiptCalculations = $this->getExpectedReceiptCalculations();
 
         //Check response content
         $expectedReceiptProperties = [
-            'status' => 'unfinished',
+            'status' => $receiptData['status'],
             'uuid' => $receiptData['uuid'],
             'total' => $expectedReceiptCalculations[$iteration]['total'],
             'totalVat' => $expectedReceiptCalculations[$iteration]['totalVat'],

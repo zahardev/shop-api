@@ -123,13 +123,9 @@ class Receipt
         return $this->status;
     }
 
-    public function setStatus(string $status): self
+    public function finish(): self
     {
-        if (!in_array($status, array(self::STATUS_UNFINISHED, self::STATUS_FINISHED))) {
-            throw new \InvalidArgumentException("Invalid status");
-        }
-
-        $this->status = $status;
+        $this->status = self::STATUS_FINISHED;
 
         return $this;
     }

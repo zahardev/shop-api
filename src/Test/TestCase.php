@@ -75,8 +75,9 @@ class TestCase extends WebTestCase
      * @param string|null $content
      * @return Response
      */
-    protected function sendRequest( string $method, string $uri, string $content = null ){
-        self::$client->request($method, $uri, array(), array(), array(), $content );
+    protected function sendRequest(string $method, string $uri, string $content = null)
+    {
+        self::$client->request($method, $uri, array(), array(), array(), $content);
 
         $response = self::$client->getResponse();
 
@@ -97,7 +98,7 @@ class TestCase extends WebTestCase
      * @param Response $response
      * @return array|null
      */
-    protected function getResponseContent( Response $response )
+    protected function getResponseContent(Response $response)
     {
         return json_decode($response->getContent(), true);
     }
@@ -140,7 +141,7 @@ class TestCase extends WebTestCase
     /**
      * @return array
      */
-    protected function getNewProductData()
+    protected function getNewProductData(): array
     {
         return [
             'name' => 'Test Product',
@@ -156,19 +157,19 @@ class TestCase extends WebTestCase
      *
      * @see fixtures/dummy.yaml
      */
-    protected function getDummyProductData()
+    protected function getDummyProductData(): array
     {
         return $this->getDummyProductsData()[0];
     }
 
 
     /**
-     * This products exist in the test database
+     * These products exist in the test database
      *
      * @see fixtures/dummy.yaml
      *
      * */
-    protected function getDummyProductsData()
+    protected function getDummyProductsData(): array
     {
         return [
             [
@@ -192,21 +193,14 @@ class TestCase extends WebTestCase
         ];
     }
 
+
     /**
-     * This product exists in the test database
+     * These receipts exist in the test database
      *
      * @see fixtures/dummy.yaml
-     */
-    protected function getDummyUnfinishedReceiptData()
-    {
-        return [
-            'uuid' => '3f2e511d-f775-4324-9c38-17b93d8a55b0',
-            'status' => 'unfinished',
-        ];
-    }
-
-
-    protected function getDummyReceiptData()
+     *
+     * */
+    protected function getDummyReceiptData(): array
     {
         return [
             'receipt_empty' => [
@@ -218,6 +212,28 @@ class TestCase extends WebTestCase
                 'status' => 'unfinished',
             ],
         ];
+    }
+
+
+    /**
+     * @param string $endpoint
+     * @param string $op
+     * @param string $path
+     * @param string|array $value
+     * @return Response
+     */
+    protected function sendPatchRequest(string $endpoint, string $op, string $path, $value)
+    {
+        $request = [
+            'op' => $op,
+            'path' => $path,
+            'value' => $value,
+        ];
+        return $this->sendRequest(
+            'PATCH',
+            $endpoint,
+            json_encode($request)
+        );
     }
 
 }

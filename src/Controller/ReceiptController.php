@@ -83,14 +83,59 @@ class ReceiptController extends BaseController
         $content = $this->getJSONContent($request);
         $this->validatePATCHContent($content);
 
-        if ('add' == $content['op'] && '/items' == $content['path']) {
+        if ($this->isAddReceiptItemRequest($content)) {
             $this->validateAddReceiptItemContent($content);
             $value = $content['value'];
 
             return $this->addReceiptItem($uuid, $value['barcode'], $value['quantity']);
         }
 
+        if ($this->isFinishReceiptRequest($content)) {
+            return $this->finishReceipt($uuid);
+        }
+
+
         throw new HttpException(400, 'Could not process the request!');
+    }
+
+
+    /**
+     * @param array $content
+     * @return bool
+     */
+    private function isAddReceiptItemRequest(array $content)
+    {
+        return 'add' === $content['op'] && '/items' === $content['path'];
+    }
+
+    /**
+     * @param array $content
+     * @return bool
+     */
+    private function isFinishReceiptRequest(array $content)
+    {
+        return 'replace' === $content['op'] && '/status' === $content['path'] && 'finished' === $content['value'];
+    }
+
+
+    /**
+     * @param string $uuid
+     * @return JsonResponse
+     */
+    private function finishReceipt(string $uuid)
+    {
+        $receipt = $this->receiptRepository->findOneBy(['uuid' => $uuid]);
+
+        if (empty($receipt)) {
+            throw new HttpException(400, 'Could not find such receipt!');
+        }
+
+        $receipt->finish();
+
+        $this->em->persist($receipt);
+        $this->em->flush();
+
+        return new JsonResponse($receipt->toArray(), 200);
     }
 
 
@@ -101,7 +146,7 @@ class ReceiptController extends BaseController
      * @return JsonResponse
      * @throws \Exception
      */
-    protected function addReceiptItem(string $uuid, int $barcode, int $quantity)
+    private function addReceiptItem(string $uuid, int $barcode, int $quantity)
     {
         $receipt = $this->receiptRepository->findOneBy(['uuid' => $uuid]);
 
@@ -129,7 +174,7 @@ class ReceiptController extends BaseController
      * @param $content
      * @throws \Exception
      */
-    protected function validateAddReceiptItemContent($content)
+    private function validateAddReceiptItemContent($content)
     {
         foreach (['barcode', 'quantity'] as $key) {
             if (!array_key_exists($key, $content['value'])) {
@@ -143,7 +188,7 @@ class ReceiptController extends BaseController
      * @param array $content
      * @throws \Exception
      */
-    protected function validatePATCHContent(array $content)
+    private function validatePATCHContent(array $content)
     {
         foreach (['op', 'path', 'value'] as $key) {
             if (!array_key_exists($key, $content)) {
@@ -152,8 +197,8 @@ class ReceiptController extends BaseController
         }
 
         $allowedMap = [
-            'op' => ['add'],
-            'path' => ['/items'],
+            'op' => ['add', 'replace'],
+            'path' => ['/items', '/status'],
         ];
 
         foreach ($allowedMap as $property => $allowedValues) {
