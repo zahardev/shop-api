@@ -1,3 +1,14 @@
+App\Entity\User:
+    admin:
+        username: 'admin'
+        roles: ['ROLE_ADMIN']
+        plainPassword: 'w35*M#iQ5bbTDH*I'
+
+    cash_register:
+        username: 'cash_register'
+        roles: ['ROLE_CASH_REGISTER']
+        plainPassword: 'Dw57hi%RAqePdbgj'
+
 App\Entity\Product:
     product_1:
         name: 'Test Product 1'

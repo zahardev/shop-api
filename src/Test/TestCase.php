@@ -116,6 +116,18 @@ class TestCase extends WebTestCase
 
 
     /**
+     * @param Response $response
+     */
+    protected function assertJsonProblemContentType(Response $response)
+    {
+        $contentType = $response->headers->get('content-type');
+        $this->assertNotEmpty($contentType);
+        $this->assertEquals('application/problem+json', $contentType);
+    }
+
+
+
+    /**
      *
      * @param array $productData
      */
@@ -213,6 +225,24 @@ class TestCase extends WebTestCase
             ],
         ];
     }
+
+
+    protected function getDummyUsersData(): array
+    {
+        return [
+            'admin' => [
+                'username' => 'admin',
+                'password' => 'w35*M#iQ5bbTDH*I',
+                'role' => 'ROLE_ADMIN',
+            ],
+            'cash_register' => [
+                'username' => 'cash_register',
+                'password' => 'Dw57hi%RAqePdbgj',
+                'role' => 'ROLE_CASH_REGISTER',
+            ],
+        ];
+    }
+
 
 
     /**

@@ -90,10 +90,8 @@ class CashRegisterTest extends TestCase
         ];
         $response = $this->sendPatchRequest('/receipts/'.$receiptData['uuid'], 'adds', '/items', $request);
 
-        $this->assertEquals(Response::HTTP_BAD_REQUEST ,$response->getStatusCode());
-        $contentType = $response->headers->get('content-type');
-        $this->assertNotEmpty($contentType);
-        $this->assertEquals('application/problem+json', $contentType);
+        $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        $this->assertJsonProblemContentType($response);
 
         $data = $this->getResponseContent($response);
         $this->assertInternalType('array', $data);
