@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\EventListener;
+namespace App\EventSubscriber;
 
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
