@@ -74,7 +74,7 @@ class ReceiptController extends BaseController
         $receipt = $this->receiptRepository->findOneBy(['uuid' => $uuid]);
 
         if (empty($receipt)) {
-            throw new HttpException(400, 'Could not find such receipt!');
+            throw $this->createNotFoundException('Could not find such receipt!');
         }
 
         $response = new JsonResponse($receipt->toArray(), Response::HTTP_OK);
@@ -90,7 +90,7 @@ class ReceiptController extends BaseController
      * @return Response
      * @throws \Exception
      */
-    public function handlePATCH(string $uuid, Request $request)
+    public function patchReceipt(string $uuid, Request $request)
     {
         $content = $this->getJSONContent($request);
         $this->validator->validatePATCHContent($content);
@@ -104,6 +104,11 @@ class ReceiptController extends BaseController
 
         if ($this->validator->isFinishReceiptRequest($content)) {
             return $this->finishReceipt($uuid);
+        }
+
+        if($this->validator->isChangeLastItemQuantityRequest($content)){
+            $this->validator->validateChangeLastItemQuantityContent($content);
+            return $this->changeLastItemQuantity($uuid, $content['value']);
         }
 
 
@@ -120,7 +125,7 @@ class ReceiptController extends BaseController
         $receipt = $this->receiptRepository->findOneBy(['uuid' => $uuid]);
 
         if (empty($receipt)) {
-            throw new HttpException(400, 'Could not find such receipt!');
+            throw $this->createNotFoundException('Could not find such receipt!');
         }
 
         $receipt->finish();
@@ -157,6 +162,36 @@ class ReceiptController extends BaseController
         $receipt->addReceiptItem($receiptItem);
 
         $this->em->persist($receipt);
+        $this->em->flush();
+
+        return new JsonResponse($receipt->toArray(), 200);
+    }
+
+
+    /**
+     * @param string $uuid
+     * @param int $newQuantity
+     * @return JsonResponse
+     */
+    private function changeLastItemQuantity(string $uuid, int $newQuantity)
+    {
+        $receipt = $this->receiptRepository->findOneBy(['uuid' => $uuid]);
+
+        if (empty($receipt)) {
+            throw $this->createNotFoundException('Could not find such receipt!');
+        }
+
+        $receiptItem = $receipt->getReceiptItems()->last(); /* @var ReceiptItem $receiptItem */
+
+        if(empty($receiptItem)){
+            throw $this->createNotFoundException('Could not find last receipt item! Maybe you didn\'t add any yet?');
+        }
+
+        $receiptItem->setQuantity($newQuantity);
+        $receipt = $receiptItem->getReceipt();
+
+        $this->em->persist($receiptItem);
+        $this->em->persist($receipt); //it was recalculated too
         $this->em->flush();
 
         return new JsonResponse($receipt->toArray(), 200);

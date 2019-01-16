@@ -275,7 +275,7 @@ class Receipt
     }
 
 
-    protected function recalculate()
+    public function recalculate()
     {
         $totals = [];
         $totalVats = [];

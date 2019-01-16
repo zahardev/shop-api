@@ -27,6 +27,16 @@ class ReceiptValidator
         return 'replace' === $content['op'] && '/status' === $content['path'] && 'finished' === $content['value'];
     }
 
+
+    /**
+     * @param array $content
+     * @return bool
+     */
+    public function isChangeLastItemQuantityRequest(array $content)
+    {
+        return 'replace' === $content['op'] && '/items/last/quantity' === $content['path'];
+    }
+
     /**
      * @param $content
      * @throws \Exception
@@ -37,6 +47,17 @@ class ReceiptValidator
             if (!array_key_exists($key, $content['value'])) {
                 throw new HttpException(400, sprintf('Property value should contain %s key!', $key));
             }
+        }
+    }
+
+    /**
+     * @param $content
+     * @throws \Exception
+     */
+    public function validateChangeLastItemQuantityContent($content)
+    {
+        if (!is_integer($content['value'])) {
+            throw new HttpException(400, sprintf('Quantity value should be an integer! Got: %s', $content['value']));
         }
     }
 
@@ -55,7 +76,7 @@ class ReceiptValidator
 
         $allowedMap = [
             'op' => ['add', 'replace'],
-            'path' => ['/items', '/status'],
+            'path' => ['/items', '/items/last/quantity', '/status'],
         ];
 
         foreach ($allowedMap as $property => $allowedValues) {

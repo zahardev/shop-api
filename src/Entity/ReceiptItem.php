@@ -107,9 +107,9 @@ class ReceiptItem
         return $this->quantity;
     }
 
-    public function addQuantity(int $quantity): self
+    public function setQuantity(int $quantity): self
     {
-        $this->quantity += $quantity;
+        $this->quantity = $quantity;
         $this->recalculate();
 
         return $this;
@@ -210,6 +210,11 @@ class ReceiptItem
         $this->setTotal($this->cost * $this->quantity);
         $this->setTotalVat($this->total * $this->vatClass / 100);
         $this->setTotalWithVat($this->total + $this->totalVat);
+
+        $receipt = $this->getReceipt();
+        if ($receipt) {
+            $receipt->recalculate();
+        }
     }
 
 

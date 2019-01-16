@@ -60,11 +60,11 @@ class CashRegisterTest extends TestCase
         foreach ($productsData as $productData) {
             $count++;
 
-            $request = [
+            $value = [
                 'barcode' => $productData['barcode'],
                 'quantity' => $quantity,
             ];
-            $response = $this->sendPatchRequest('/receipts/'.$receiptData['uuid'], 'add', '/items', $request);
+            $response = $this->sendPatchRequest('/receipts/'.$receiptData['uuid'], 'add', '/items', $value);
 
             //Check response status and headers
             $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
@@ -88,7 +88,7 @@ class CashRegisterTest extends TestCase
             'barcode' => $productData['barcode'],
             'quantity' => 3,
         ];
-        $response = $this->sendPatchRequest('/receipts/'.$receiptData['uuid'], 'adds', '/items', $request);
+        $response = $this->sendPatchRequest('/receipts/'.$receiptData['uuid'], 'wrong', '/items', $request);
 
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
         $this->assertJsonProblemContentType($response);
@@ -97,6 +97,27 @@ class CashRegisterTest extends TestCase
         $this->assertInternalType('array', $data);
 
         $this->assertAllPropertiesExist($data, ['status', 'type', 'title', 'detail']);
+    }
+
+    public function testChangeAmountOfLastItem()
+    {
+        $receiptData = $this->getDummyReceiptData()['receipt_with_items'];
+
+        $newQuantity = 5;
+
+        $response = $this->sendPatchRequest('/receipts/'.$receiptData['uuid'], 'replace', '/items/last/quantity', $newQuantity);
+
+        //Check response status and headers
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertJsonContentType($response);
+
+        //Check response data
+        $data = $this->getResponseContent($response);
+        $this->assertInternalType('array', $data);
+
+        $items = $data['items'];
+        $item = end($items);
+        $this->assertEquals($newQuantity, $item['quantity']);
     }
 
 
