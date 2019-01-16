@@ -4,12 +4,15 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ReceiptItemRepository")
  */
 class ReceiptItem
 {
+    use TimestampableEntity;
+
     const MONEY_PRECISION = 2;
 
     /**
