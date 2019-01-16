@@ -36,7 +36,7 @@ class ProductController extends BaseController
      * @throws \Exception
      * @IsGranted("ROLE_ADMIN")
      */
-    public function newAction(Request $request, EntityManagerInterface $em)
+    public function newProduct(Request $request, EntityManagerInterface $em)
     {
         $product = new Product();
 
@@ -69,7 +69,7 @@ class ProductController extends BaseController
      * @IsGranted("ROLE_CASH_REGISTER")
      *
      */
-    public function showAction($barcode)
+    public function showProduct($barcode)
     {
         $product = $this->productRepository->findOneBy(['barcode' => $barcode]);
 
@@ -81,7 +81,7 @@ class ProductController extends BaseController
      * @Route("/products", methods={"GET"})
      * @IsGranted("ROLE_ADMIN")
      * */
-    public function listAction()
+    public function listProducts()
     {
         $products = $this->productRepository->findAll();
 

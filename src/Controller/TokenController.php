@@ -47,7 +47,7 @@ class TokenController extends BaseController
         $user = $this->userRepository->findOneBy(['username' => $data['username']]);
 
         if (empty($user)) {
-            $this->createNotFoundException();
+            throw $this->createNotFoundException();
         }
 
         if (!$this->passEncoder->isPasswordValid($user, $data['password'])) {
