@@ -7,12 +7,17 @@ use App\Entity\ReceiptItem;
 use App\Repository\ProductRepository;
 use App\Repository\ReceiptRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
+
+/**
+ * @IsGranted("ROLE_CASH_REGISTER")
+ * */
 class ReceiptController extends BaseController
 {
 

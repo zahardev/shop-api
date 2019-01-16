@@ -3,11 +3,14 @@
 
 namespace App\Test;
 
+use App\Repository\UserRepository;
+use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * Class TestCase
@@ -22,6 +25,16 @@ class TestCase extends WebTestCase
      * @var Client
      */
     protected static $client;
+
+    /**
+     * @var string
+     */
+    protected $cashRegisterToken;
+
+    /**
+     * @var string
+     */
+    protected $adminToken;
 
 
     public static function setUpBeforeClass()
@@ -73,11 +86,12 @@ class TestCase extends WebTestCase
      * @param string $method
      * @param string $uri
      * @param string|null $content
+     * @param array $headers
      * @return Response
      */
-    protected function sendRequest(string $method, string $uri, string $content = null)
+    protected function sendRequest(string $method, string $uri, string $content = null, array $headers = [] )
     {
-        self::$client->request($method, $uri, array(), array(), array(), $content);
+        self::$client->request($method, $uri, array(), array(), $headers, $content);
 
         $response = self::$client->getResponse();
 
@@ -244,15 +258,15 @@ class TestCase extends WebTestCase
     }
 
 
-
     /**
      * @param string $endpoint
      * @param string $op
      * @param string $path
      * @param string|array $value
+     * @param array $headers
      * @return Response
      */
-    protected function sendPatchRequest(string $endpoint, string $op, string $path, $value)
+    protected function sendPatchRequest(string $endpoint, string $op, string $path, $value, array $headers = [])
     {
         $request = [
             'op' => $op,
@@ -262,8 +276,30 @@ class TestCase extends WebTestCase
         return $this->sendRequest(
             'PATCH',
             $endpoint,
-            json_encode($request)
+            json_encode($request),
+            $headers
         );
+    }
+
+
+    /**
+     * @param $username
+     * @return string
+     */
+    protected function generateToken($username)
+    {
+        try{
+            $encoder = self::$kernel->getContainer()->get('lexik_jwt_authentication.encoder');
+            return $encoder->encode(
+                [
+                    'username' => $username,
+                    'exp' => time() + 3600,
+                ]
+            );
+        } catch(\Exception $e){
+            echo $e->getMessage();
+        }
+        return '';
     }
 
 }

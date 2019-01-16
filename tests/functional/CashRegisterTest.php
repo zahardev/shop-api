@@ -105,6 +105,8 @@ class CashRegisterTest extends TestCase
         $receiptData = $this->getDummyReceiptData()['receipt_with_items'];
         $response = $this->sendRequest('GET', '/receipts/'.$receiptData['uuid']);
 
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+
         $data = $this->getResponseContent($response);
         $this->checkReceiptResponseData($data, $receiptData, 3); //all 3 iterations were inserted in the dummy.yaml
     }
@@ -244,5 +246,35 @@ class CashRegisterTest extends TestCase
                 'totalWithVat' => 105.99,
             ],
         ];
+    }
+
+    protected function sendRequest(string $method, string $uri, string $content = null, array $headers = [])
+    {
+        if( empty($this->cashRegisterToken) ){
+            $this->cashRegisterToken = $this->generateToken('cash_register');
+        }
+
+        $headers['HTTP_Authorization'] = 'Bearer '.$this->cashRegisterToken;
+
+        return parent::sendRequest($method, $uri, $content, $headers);
+    }
+
+    /**
+     * @param string $endpoint
+     * @param string $op
+     * @param string $path
+     * @param string|array $value
+     * @param array $headers
+     * @return Response
+     */
+    protected function sendPatchRequest(string $endpoint, string $op, string $path, $value, array $headers = [])
+    {
+        if( empty($this->cashRegisterToken) ){
+            $this->cashRegisterToken = $this->generateToken('cash_register');
+        }
+
+        $headers['HTTP_Authorization'] = 'Bearer '.$this->cashRegisterToken;
+
+        return parent::sendPatchRequest($endpoint, $op, $path, $value, $headers);
     }
 }

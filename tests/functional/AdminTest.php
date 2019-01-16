@@ -47,4 +47,15 @@ class AdminTest extends TestCase
         $this->assertCount(3, $products['products']);
         $this->assertAllProductPropertiesExist($products['products'][0]);
     }
+
+    protected function sendRequest(string $method, string $uri, string $content = null, array $headers = [])
+    {
+        if( empty($this->adminToken) ){
+            $this->adminToken = $this->generateToken('admin');
+        }
+
+        $headers['HTTP_Authorization'] = 'Bearer '.$this->adminToken;
+
+        return parent::sendRequest($method, $uri, $content, $headers);
+    }
 }
