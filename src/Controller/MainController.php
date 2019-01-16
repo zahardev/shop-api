@@ -20,18 +20,24 @@ class MainController extends BaseController
      * @Route("/", methods={"GET"})
      * @param Request $request
      * @return JsonResponse
-     * @IsGranted("ROLE_USER")
      */
     public function showLinks(Request $request)
     {
-        $detail = 'You are logged in as '.$this->getUser()->getUsername();
+        $user = $this->getUser();
 
-        $data = [
-            'title' => 'Logged in',
-            'detail' => $detail,
-        ];
+        if(empty($user)){
+            $data = [
+                'title' => 'Welcome!',
+                'detail' => 'Welcome to the shop API! Please get token to be able sending requests.'
+            ];
+        } else {
+            $data = [
+                'title' => 'Logged in',
+                'detail' => 'You are logged in as '.$user->getUsername(),
+            ];
+        }
 
-        $data = $this->links->addLinks($data, $request->getPathInfo(), true);
+        $data = $this->links->addLinks($data, $request->getPathInfo(), $this->isGranted('ROLE_USER'));
 
         return new JsonHALResponse($data);
     }
