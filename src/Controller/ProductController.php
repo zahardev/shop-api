@@ -5,13 +5,14 @@ namespace App\Controller;
 use App\Entity\Product;
 use App\Form\ProductType;
 use App\Repository\ProductRepository;
+use App\Utils\JsonHALResponse;
+use App\Utils\Links;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ProductController extends BaseController
@@ -21,8 +22,9 @@ class ProductController extends BaseController
      */
     private $productRepository;
 
-    public function __construct( ProductRepository $productRepository )
+    public function __construct(Links $links, ProductRepository $productRepository)
     {
+        parent::__construct($links);
 
         $this->productRepository = $productRepository;
     }
@@ -44,8 +46,8 @@ class ProductController extends BaseController
 
         $this->processForm($request, $form);
 
-        if(!$form->isValid()){
-            throw new \Exception('Invalid data sent', Response::HTTP_BAD_REQUEST);
+        if (!$form->isValid()) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Invalid data sent');
         }
 
         $em->persist($product);
@@ -54,7 +56,9 @@ class ProductController extends BaseController
 
         $url = $this->generateUrl('show_product', ['barcode' => $product->getBarcode()]);
 
-        $response = new JsonResponse($this->serialize($product), Response::HTTP_CREATED);
+        $data = $this->serialize($product);
+
+        $response = new JsonHALResponse($this->links->addLinks($data, $request->getPathInfo()), Response::HTTP_CREATED);
         $response->headers->set('Location', $url);
 
         return $response;
@@ -64,24 +68,27 @@ class ProductController extends BaseController
     /**
      * @Route("/products/{barcode}", name="show_product", methods={"GET"})
      * @param string $barcode
+     * @param Request $request
      * @return JsonResponse
-     *
-     * @IsGranted("ROLE_CASH_REGISTER")
-     *
+     ** @IsGranted("ROLE_CASH_REGISTER")
      */
-    public function showProduct($barcode)
+    public function showProduct($barcode, Request $request)
     {
         $product = $this->productRepository->findOneBy(['barcode' => $barcode]);
 
-        return new JsonResponse($this->serialize($product));
+        $data = $this->serialize($product);
+
+        return new JsonHALResponse($this->links->addLinks($data, $request->getPathInfo()));
     }
 
 
     /**
      * @Route("/products", methods={"GET"})
      * @IsGranted("ROLE_ADMIN")
-     * */
-    public function listProducts()
+     * @param Request $request
+     * @return JsonHALResponse
+     */
+    public function listProducts(Request $request)
     {
         $products = $this->productRepository->findAll();
 
@@ -91,7 +98,11 @@ class ProductController extends BaseController
             $res[] = $this->serialize($product);
         }
 
-        return new JsonResponse(['products' => $res]);
+        $data = ['products' => $res];
+
+        $data = $this->links->addLinks($data, $request->getPathInfo());
+
+        return new JsonHALResponse($data);
     }
 
 

@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Repository\UserRepository;
+use App\Utils\JsonHALResponse;
+use App\Utils\Links;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,11 +25,13 @@ class TokenController extends BaseController
     public function __construct(
         UserRepository $userRepository,
         UserPasswordEncoderInterface $passEncoder,
-        JWTEncoderInterface $jwtEncoder
+        JWTEncoderInterface $jwtEncoder,
+        Links $links
     ) {
         $this->userRepository = $userRepository;
         $this->passEncoder = $passEncoder;
         $this->jwtEncoder = $jwtEncoder;
+        parent::__construct($links);
     }
 
     /**
@@ -46,11 +50,7 @@ class TokenController extends BaseController
 
         $user = $this->userRepository->findOneBy(['username' => $data['username']]);
 
-        if (empty($user)) {
-            throw $this->createNotFoundException();
-        }
-
-        if (!$this->passEncoder->isPasswordValid($user, $data['password'])) {
+        if (empty($user) || !$this->passEncoder->isPasswordValid($user, $data['password'])) {
             throw new HttpException(Response::HTTP_UNAUTHORIZED, 'Invalid credentials.');
         }
 
@@ -61,6 +61,9 @@ class TokenController extends BaseController
 
         $token = $this->jwtEncoder->encode($tokenData);
 
-        return new JsonResponse(['token' => $token]);
+        $data = ['token' => $token];
+
+        return new JsonHALResponse($this->links->addLinks($data, $request));
     }
+
 }

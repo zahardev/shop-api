@@ -29,7 +29,9 @@ class AdminTest extends TestCase
 
         //Check response content
         $productData = $this->getResponseContent($response);
+        $this->assertContentHasLinks($productData);
         $this->assertInternalType('array', $productData);
+        unset($productData['_links']);
         $this->assertEquals($data, $productData);
     }
 

@@ -26,6 +26,8 @@ class CashRegisterTest extends TestCase
         $this->assertInternalType('array', $productData);
         $this->assertAllProductPropertiesExist($productData);
 
+        $this->assertContentHasLinks($productData);
+        unset($productData['_links']);
         $this->assertEquals($dummy, $productData);
     }
 
@@ -67,7 +69,7 @@ class CashRegisterTest extends TestCase
             $response = $this->sendPatchRequest('/receipts/'.$receiptData['uuid'], 'add', '/items', $value);
 
             //Check response status and headers
-            $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+            $this->assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
             $this->assertJsonContentType($response);
 
             //Check response data
@@ -91,7 +93,7 @@ class CashRegisterTest extends TestCase
         $response = $this->sendPatchRequest('/receipts/'.$receiptData['uuid'], 'wrong', '/items', $request);
 
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-        $this->assertJsonProblemContentType($response);
+        $this->assertJsonContentType($response);
 
         $data = $this->getResponseContent($response);
         $this->assertInternalType('array', $data);

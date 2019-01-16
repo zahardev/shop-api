@@ -125,7 +125,7 @@ class TestCase extends WebTestCase
     {
         $contentType = $response->headers->get('content-type');
         $this->assertNotEmpty($contentType);
-        $this->assertEquals('application/json', $contentType);
+        $this->assertEquals('application/hal+json', $contentType);
     }
 
 
@@ -161,6 +161,16 @@ class TestCase extends WebTestCase
         foreach ($properties as $key) {
             $this->assertArrayHasKey($key, $data);
         }
+    }
+
+    /**
+     *
+     * @param array $data
+     */
+    protected function assertContentHasLinks(array $data)
+    {
+        $this->assertArrayHasKey('_links', $data);
+        $this->assertNotEmpty($data['_links']);
     }
 
 

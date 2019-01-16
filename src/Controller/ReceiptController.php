@@ -6,6 +6,8 @@ use App\Entity\Receipt;
 use App\Entity\ReceiptItem;
 use App\Repository\ProductRepository;
 use App\Repository\ReceiptRepository;
+use App\Utils\JsonHALResponse;
+use App\Utils\Links;
 use App\Utils\ReceiptValidator;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -32,11 +34,13 @@ class ReceiptController extends BaseController
 
 
     public function __construct(
+        Links $links,
         EntityManagerInterface $em,
         ProductRepository $productRepository,
         ReceiptRepository $receiptRepository,
         ReceiptValidator $validator
     ) {
+        parent::__construct($links);
         $this->em = $em;
         $this->productRepository = $productRepository;
         $this->receiptRepository = $receiptRepository;
@@ -46,17 +50,22 @@ class ReceiptController extends BaseController
 
     /**
      * @Route("/receipts", methods={"POST"})
+     * @param Request $request
      * @return Response
      * @throws \Exception
      */
-    public function newReceipt()
+    public function newReceipt(Request $request)
     {
         $receipt = new Receipt();
 
         $this->em->persist($receipt);
         $this->em->flush();
 
-        $response = new JsonResponse($receipt->toArray(), Response::HTTP_CREATED);
+        $data = $receipt->toArray();
+
+        $data = $this->links->addLinks($data, $request->getPathInfo());
+
+        $response = new JsonHALResponse($data, Response::HTTP_CREATED);
         $url = $this->generateUrl('show_receipt', ['uuid' => $receipt->getUuid()]);
         $response->headers->set('Location', $url);
 
@@ -67,9 +76,10 @@ class ReceiptController extends BaseController
     /**
      * @Route("/receipts/{uuid}", name="show_receipt", methods={"GET"})
      * @param string $uuid
+     * @param Request $request
      * @return Response
      */
-    public function showReceipt(string $uuid)
+    public function showReceipt(string $uuid, Request $request)
     {
         $receipt = $this->receiptRepository->findOneBy(['uuid' => $uuid]);
 
@@ -77,7 +87,11 @@ class ReceiptController extends BaseController
             throw $this->createNotFoundException('Could not find such receipt!');
         }
 
-        $response = new JsonResponse($receipt->toArray(), Response::HTTP_OK);
+        $data = $receipt->toArray();
+
+        $data = $this->links->addLinks($data, $request->getPathInfo());
+
+        $response = new JsonHALResponse($data, Response::HTTP_OK);
 
         return $response;
     }
@@ -99,16 +113,16 @@ class ReceiptController extends BaseController
             $this->validator->validateAddReceiptItemContent($content);
             $value = $content['value'];
 
-            return $this->addReceiptItem($uuid, $value['barcode'], $value['quantity']);
+            return $this->addReceiptItem($uuid, $value['barcode'], $value['quantity'], $request);
         }
 
         if ($this->validator->isFinishReceiptRequest($content)) {
-            return $this->finishReceipt($uuid);
+            return $this->finishReceipt($uuid, $request);
         }
 
         if($this->validator->isChangeLastItemQuantityRequest($content)){
             $this->validator->validateChangeLastItemQuantityContent($content);
-            return $this->changeLastItemQuantity($uuid, $content['value']);
+            return $this->changeLastItemQuantity($uuid, $content['value'], $request);
         }
 
 
@@ -120,7 +134,7 @@ class ReceiptController extends BaseController
      * @param string $uuid
      * @return JsonResponse
      */
-    private function finishReceipt(string $uuid)
+    private function finishReceipt(string $uuid, Request $request)
     {
         $receipt = $this->receiptRepository->findOneBy(['uuid' => $uuid]);
 
@@ -133,7 +147,11 @@ class ReceiptController extends BaseController
         $this->em->persist($receipt);
         $this->em->flush();
 
-        return new JsonResponse($receipt->toArray(), 200);
+        $data = $receipt->toArray();
+
+        $data = $this->links->addLinks($data, $request->getPathInfo());
+
+        return new JsonHALResponse($data, 200);
     }
 
 
@@ -144,7 +162,7 @@ class ReceiptController extends BaseController
      * @return JsonResponse
      * @throws \Exception
      */
-    private function addReceiptItem(string $uuid, int $barcode, int $quantity)
+    private function addReceiptItem(string $uuid, int $barcode, int $quantity, Request $request)
     {
         $receipt = $this->receiptRepository->findOneBy(['uuid' => $uuid]);
 
@@ -164,7 +182,11 @@ class ReceiptController extends BaseController
         $this->em->persist($receipt);
         $this->em->flush();
 
-        return new JsonResponse($receipt->toArray(), 200);
+        $data = $receipt->toArray();
+
+        $data = $this->links->addLinks($data, $request->getPathInfo());
+
+        return new JsonHALResponse($data, 201);
     }
 
 
@@ -173,7 +195,7 @@ class ReceiptController extends BaseController
      * @param int $newQuantity
      * @return JsonResponse
      */
-    private function changeLastItemQuantity(string $uuid, int $newQuantity)
+    private function changeLastItemQuantity(string $uuid, int $newQuantity, Request $request)
     {
         $receipt = $this->receiptRepository->findOneBy(['uuid' => $uuid]);
 
@@ -194,7 +216,11 @@ class ReceiptController extends BaseController
         $this->em->persist($receipt); //it was recalculated too
         $this->em->flush();
 
-        return new JsonResponse($receipt->toArray(), 200);
+        $data = $receipt->toArray();
+
+        $data = $this->links->addLinks($data, $request->getPathInfo());
+
+        return new JsonHALResponse($data);
     }
 
 }

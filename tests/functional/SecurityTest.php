@@ -44,7 +44,7 @@ class SecurityTest extends TestCase
         $response = $this->sendRequest('POST', '/token', json_encode($data));
 
         $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
-        $this->assertJsonProblemContentType($response);
+        $this->assertJsonContentType($response);
 
         $data = $this->getResponseContent($response);
         $this->assertInternalType('array', $data);
